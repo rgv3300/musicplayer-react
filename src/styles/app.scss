@@ -4,6 +4,20 @@
     box-sizing: border-box;
 }
 
+body {
+    font-family: "Raleway", sans-serif;
+}
+
+h3,
+h2 {
+    font-weight: 900;
+    font-style: italic;
+}
+
+h4 {
+    font-weight: 300;
+}
+
 h1,
 h2,
 h3 {
@@ -12,3 +26,4 @@ h3 {
 
 @import "./player";
 @import "./song";
+@import "./library";
