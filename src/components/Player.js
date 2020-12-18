@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPlay,
@@ -13,10 +13,21 @@ const Player = ({
   currentSong,
   setIsPlaying,
   isPlaying,
+  setSongs,
 }) => {
   //Ref
   const audioRef = useRef(null);
+  // useEffect
+  useEffect(() => {
+    const newSongs = songs.map((song) =>
+      song.id === currentSong.id
+        ? { ...song, active: true }
+        : { ...song, active: false }
+    );
+    setSongs(newSongs);
+  }, [currentSong]);
   //event handlers
+
   const dragHandler = (e) => {
     audioRef.current.currentTime = e.target.value;
     setSongInfo({ ...songInfo, currentTime: e.target.value });
@@ -30,10 +41,10 @@ const Player = ({
       setIsPlaying(!isPlaying);
     }
   };
-  const skipTrackHandler = (direction) => {
+  const skipTrackHandler = async (direction) => {
     let currentIndex = songs.findIndex((song) => song.id === currentSong.id);
     if (direction === "skip-forward") {
-      setCurrentSong(songs[(currentIndex + 1) % songs.length]);
+      await setCurrentSong(songs[(currentIndex + 1) % songs.length]);
     }
     if (direction === "skip-back") {
       if ((currentIndex - 1) % songs.length === -1) {
@@ -42,11 +53,18 @@ const Player = ({
       }
       setCurrentSong(songs[(currentIndex - 1) % songs.length]);
     }
+    if (isPlaying) audioRef.current.play();
   };
   const timeUpdateHandler = (e) => {
     const current = e.target.currentTime;
     const duration = e.target.duration;
-    setSongInfo({ ...songInfo, currentTime: current, duration });
+    //calculate percentage
+
+    setSongInfo({
+      ...songInfo,
+      currentTime: current,
+      duration,
+    });
   };
   const getTime = (time) => {
     return (
@@ -62,7 +80,9 @@ const Player = ({
   const [songInfo, setSongInfo] = useState({
     currentTime: 0,
     duration: 0,
+    animationPercentage: 0,
   });
+
   return (
     <div className="player">
       <div className="time-control">
@@ -102,6 +122,7 @@ const Player = ({
         onTimeUpdate={timeUpdateHandler}
         onLoadedMetadata={timeUpdateHandler}
         src={currentSong.audio}
+        onEnded={() => skipTrackHandler("skip-forward")}
       ></audio>
     </div>
   );
